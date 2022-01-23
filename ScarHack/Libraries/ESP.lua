@@ -1,7 +1,7 @@
 -- Drawing
 if Drawing == nil then
     -- Drawing not supported, loading internal Drawing...
-    Drawing = loadstring(game:HttpGet("https://github.com/fatesc/Roblox-Drawing-Lib/blob/main/main.lua"))()
+    loadstring(game:HttpGet("https://github.com/fatesc/Roblox-Drawing-Lib/blob/main/main.lua"))()
 end
 
 --Settings--
@@ -237,7 +237,9 @@ function boxBase:Update()
         else
             self.Components.Name.Visible = false
         end
-    else if ESP.Distances then
+    end
+
+    if ESP.Distances then
         local TagPos, Vis5 = WorldToViewportPoint(cam, locs.TagPos.p)
         
         if Vis5 then
@@ -277,6 +279,8 @@ function boxBase:Update()
             self.Components.Health.Text = tostring("Health: "..self.Health)
             self.Components.Health.Color = color
         else
+            self.Components.Health.Visible = false
+        end
     else
         self.Components.Health.Visible = false
     end
