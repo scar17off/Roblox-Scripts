@@ -1,9 +1,15 @@
+-- Drawing
+if Drawing == nil then
+    -- Drawing not supported, loading internal Drawing...
+    Drawing = loadstring(game:HttpGet("https://github.com/fatesc/Roblox-Drawing-Lib/blob/main/main.lua"))()
+end
+
 --Settings--
 local ESP = {
     Enabled = false,
     Boxes = false,
     BoxShift = CFrame.new(0,-1.5,0),
-	BoxSize = Vector3.new(4,6,0),
+    BoxSize = Vector3.new(4,6,0),
     Color = Color3.fromRGB(255, 170, 0),
     FaceCamera = false,
     Names = false,
@@ -12,9 +18,10 @@ local ESP = {
     AttachShift = 1,
     TeamMates = false,
     Players = false,
-	Distances = false,
+    Distances = false,
     Objects = setmetatable({}, {__mode="kv"}),
-    Overrides = {}
+    Overrides = {},
+    Health = false
 }
 
 --Declarations--
@@ -28,49 +35,49 @@ local WorldToViewportPoint = cam.WorldToViewportPoint
 
 --Functions--
 local function Draw(obj, props)
-	local new = Drawing.new(obj)
-	
-	props = props or {}
-	for i,v in pairs(props) do
-		new[i] = v
-	end
-	return new
+    local new = Drawing.new(obj)
+    
+    props = props or {}
+    for i,v in pairs(props) do
+        new[i] = v
+    end
+    return new
 end
 
 function ESP:GetTeam(p)
-	local ov = self.Overrides.GetTeam
-	if ov then
-		return ov(p)
-	end
-	
-	return p and p.Team
+    local ov = self.Overrides.GetTeam
+    if ov then
+        return ov(p)
+    end
+    
+    return p and p.Team
 end
 
 function ESP:IsTeamMate(p)
     local ov = self.Overrides.IsTeamMate
-	if ov then
-		return ov(p)
+    if ov then
+        return ov(p)
     end
     
     return self:GetTeam(p) == self:GetTeam(plr)
 end
 
 function ESP:GetColor(obj)
-	local ov = self.Overrides.GetColor
-	if ov then
-		return ov(obj)
+    local ov = self.Overrides.GetColor
+    if ov then
+        return ov(obj)
     end
     local p = self:GetPlrFromChar(obj)
-	return p and self.TeamColor and p.Team and p.Team.TeamColor.Color or self.Color
+    return p and self.TeamColor and p.Team and p.Team.TeamColor.Color or self.Color
 end
 
 function ESP:GetPlrFromChar(char)
-	local ov = self.Overrides.GetPlrFromChar
-	if ov then
-		return ov(char)
-	end
-	
-	return plrs:GetPlayerFromCharacter(char)
+    local ov = self.Overrides.GetPlrFromChar
+    if ov then
+        return ov(char)
+    end
+    
+    return plrs:GetPlayerFromCharacter(char)
 end
 
 function ESP:Toggle(bool)
@@ -260,6 +267,19 @@ function boxBase:Update()
     else
         self.Components.Tracer.Visible = false
     end
+
+    if ESP.Health then
+        local TagPos, Vis5 = WorldToViewportPoint(cam, locs.TagPos.p)
+        
+        if Vis5 then
+            self.Components.Health.Visible = true
+            self.Components.Health.Position = Vector2.new(TagPos.X, TagPos.Y)
+            self.Components.Health.Text = tostring("Health: "..self.Health)
+            self.Components.Health.Color = color
+        else
+    else
+        self.Components.Health.Visible = false
+    end
 end
 
 function ESP:Add(obj, options)
@@ -294,26 +314,34 @@ function ESP:Add(obj, options)
         Visible = self.Enabled and self.Boxes
     })
     box.Components["Name"] = Draw("Text", {
-		Text = box.Name,
-		Color = box.Color,
-		Center = true,
-		Outline = true,
+        Text = box.Name,
+        Color = box.Color,
+        Center = true,
+        Outline = true,
         Size = 19,
         Visible = self.Enabled and self.Names
-	})
-	box.Components["Distance"] = Draw("Text", {
-		Color = box.Color,
-		Center = true,
-		Outline = true,
+    })
+    box.Components["Distance"] = Draw("Text", {
+        Color = box.Color,
+        Center = true,
+        Outline = true,
         Size = 19,
         Visible = self.Enabled and self.Names
-	})
-	
-	box.Components["Tracer"] = Draw("Line", {
-		Thickness = ESP.Thickness,
-		Color = box.Color,
+    })
+    
+    box.Components["Tracer"] = Draw("Line", {
+        Thickness = ESP.Thickness,
+        Color = box.Color,
         Transparency = 1,
         Visible = self.Enabled and self.Tracers
+    })
+
+    box.Components["Health"] = Draw("Text", {
+        Color = box.Color,
+        Center = true,
+        Outline = true,
+        Size = 19,
+        Visible = self.Enabled and self.Names
     })
     self.Objects[obj] = box
     
@@ -329,12 +357,12 @@ function ESP:Add(obj, options)
     end)
 
     local hum = obj:FindFirstChildOfClass("Humanoid")
-	if hum then
+    if hum then
         hum.Died:Connect(function()
             if ESP.AutoRemove ~= false then
                 box:Remove()
             end
-		end)
+        end)
     end
 
     return box
