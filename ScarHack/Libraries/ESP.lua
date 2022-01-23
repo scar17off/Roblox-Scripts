@@ -1,8 +1,8 @@
 -- Drawing
-if Drawing == nil then
-    -- Drawing not supported, loading internal Drawing...
-    loadstring(game:HttpGet("https://github.com/fatesc/Roblox-Drawing-Lib/blob/main/main.lua"))()
-end
+--if Drawing == nil then
+--    -- Drawing not supported, loading internal Drawing...
+--    loadstring(game:HttpGet("https://github.com/fatesc/Roblox-Drawing-Lib/blob/main/main.lua"))()
+--end
 
 --Settings--
 local ESP = {
